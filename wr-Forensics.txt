@@ -1,0 +1,389 @@
+===================================================================
+Warmup 1
+
+	Flag:
+		picoCTF{welcome_to_forensics}	
+
+===================================================================
+Warmup 2
+
+	Flag:
+		picoCTF{extensions_are_a_lie}
+
+===================================================================
+desrouleaux
+
+	Retrieve information from the file:
+		cat desrouleaux.json
+
+	Answering the questions by hand
+
+	Question 1:
+		99.203.75.164
+
+	Question 2:
+		2/3
+
+	Question 3:
+
+		d35da79260a3f1b8 
+			(0)	71.104.98.177
+			(7)	121.220.112.17
+
+		1fedf3b678073188
+			(1)	55.216.81.19
+			(3)	116.72.101.28
+			(5)	116.72.101.20 	*Not unique
+			(9)	55.216.81.19 	*Not unique
+ 
+		eb0ed222b50b81b6
+			(2)	121.220.112.17
+
+		175943a42bbb5591
+			(4)	55.216.81.19
+
+		e6a87dd6f313b50e
+			(6)	150.13.158.134
+
+		19ca75c22a172bb1
+			(8)	208.198.9.155
+
+		8 files / 6 unique destinations = 1.33
+
+	Flag:
+		picoCTF{J4y_s0n_d3rUUUULo_4f3aae0d}
+
+
+===================================================================
+Reading Between the Eyes
+
+	Hint:
+		Maybe you can find an online decoder?
+		*'Stego-Saurus hid...' in description
+
+	The hint shows that we might need to decode the contents of the file and the description hints at steganography.
+
+	These two hints were enough direction for me to find zsteg, a tool used to detect hidden data in PNG and BMP files.
+
+	zsteg readingbetweentheeyes.png
+	b1,r,lsb,xy         .. text: "^5>c[rvyzrf@"
+	b1,rgb,lsb,xy       .. text: "picoCTF{r34d1ng_b37w33n_7h3_by73s}"
+	b1,abgr,msb,xy      .. file: PGP\011Secret Sub-key -
+	b2,g,msb,xy         .. text: "ADTU@PEPA"
+	b3,abgr,msb,xy      .. text: "t@Wv!Wt\tGtA"
+	b4,r,msb,xy         .. text: "0Tt7F3Saf"
+	b4,g,msb,xy         .. text: "2g'uV `3"
+	b4,b,lsb,xy         .. text: "##3\"TC%\"2f"
+	b4,b,msb,xy         .. text: " uvb&b@f!"
+	b4,rgb,lsb,xy       .. text: "1C5\"RdWD"
+	b4,rgb,msb,xy       .. text: "T E2d##B#VuQ`"
+	b4,bgr,lsb,xy       .. text: "A%2RTdGG"
+	b4,bgr,msb,xy       .. text: "EPD%4\"c\"#CUVqa "
+	b4,rgba,lsb,xy      .. text: "?5/%/d_tO"
+	b4,abgr,msb,xy      .. text: "EO%O#/c/2/C_e_q"
+
+	Flag:
+		picoCTF{r34d1ng_b37w33n_7h3_by73s}
+
+
+===================================================================
+Recovering From the Snap
+
+	Hints:
+		Some files have been deleted from the disk image, but are they really gone?
+
+	The file provided has a '.dd' extensions, which is the file extension for a compressed archive file format (Macintosh DISKDOUBLER), which are comrpessed with LZ78 compression.
+
+	Since it is hinted that some files are deleted, we can use the tool testdisk.
+
+		testdisk recoveringfromsnap.dd
+
+	We are able to list all files (even the ones that were deleted)
+
+		Directory /
+
+		 -rwxr-xr-x     0     0    632333 25-Jul-2018 00:01 dachshund.jpg
+		 -rwxr-xr-x     0     0    493564 25-Jul-2018 00:01 fox.jpg
+		>-rwxr-xr-x     0     0    389187 25-Jul-2018 00:01 frog.jpg
+		 -rwxr-xr-x     0     0    254837 25-Jul-2018 00:01 giraffe.jpg
+		 -rwxr-xr-x     0     0    321758 25-Jul-2018 00:01 music.jpg
+		 -rwxr-xr-x     0     0    469105 25-Jul-2018 00:01 rabbit2.jpg
+		 -rwxr-xr-x     0     0    393003 25-Jul-2018 00:01 rabbit.jpg
+		 -rwxr-xr-x     0     0     40384 25-Jul-2018 00:01 theflag.jpg
+
+	As we can see, there used to be a theflag.jpg, we are able to copy this file to our directory, which we can open and displays the flag.
+
+	Flag:
+		picoCTF{th3_5n4p_happ3n3d}
+
+
+===================================================================
+admin panel
+	
+	This challenge requires you to go through packets using a tool such as wireshark. The packets show that a user is logging into a website with the username jimmy, password p4ssw0rd, who is not an admin who then logs out. A user 'admin' then logs in. The flag can be found in this POST packet at the very end.
+
+	Flag:
+		picoCTF{n0ts3cur3_b186631d}
+	
+===================================================================
+hex editor
+
+	Hint:
+		What is a hex editor?
+
+	Out of habit, I used the command:
+
+		strings hex-editor.jpg
+
+	Just to see if anything interesting pops up, and lo and behold the flag appears at the very bottom.
+
+	Flag:
+		picoCTF{and_thats_how_u_edit_hex_kittos_22C1d865}
+	
+
+===================================================================
+Truly an Artist
+
+	Hint:
+		Try looking beyong the image.
+		Who created this?
+		*Can you help us find the flag in this Meta-Material
+
+
+	Again, out of habit:
+
+		strings trulyanartist.png
+
+	This retrieved the flag.
+
+	Flag:
+		picoCTF{look_in_image_7e31505f}
+
+
+===================================================================
+now you dont
+
+	Hint:
+	    There is an old saying: if you want to hide the treasure, put it in plain sight. Then no one will see it.
+	    Is it really all one shade of red?
+
+	The file given is a png of red. However, the hint tells us that the flag might be a slightly different shade of red, which would be hidden in the picture.
+
+
+
+
+===================================================================
+Ext Super Magic
+
+	Hints:
+	    Are there any tools for diagnosing corrupted filesystems (fsck)? What do they say if you run them on this one?   
+	    How does a linux machine know what type of file a file is?
+	    You might find this doc helpful.	    
+	    Be careful with endianness when making edits.
+	    Once you've fixed the corruption, you can use /sbin/debugfs to pull the flag file out.
+
+	Using the utility (debugfs) mentioned in the hint:
+
+		debugfs ext-super-magic.img 
+		debugfs 1.44.1 (24-Mar-2018)
+		Checksum errors in superblock!  Retrying...
+		ext-super-magic.img: Bad magic number in super-block while opening filesystem
+
+	We can see that the magic number if corrupted. Given in the hints, the magic number(file signature):
+
+		A magic number is a sequence of bytes that is used in all files of a certain format, usually at a given position (often at the beginning). Since all files in that particular format have that particular byte sequence in that particular position, and most files in other formats don't have it, the magic number is a way to recognize what format a file is in.
+
+	Since the name of the challenge is Ext, we can search on google for the magic number of ext.
+
+		Filesystems typically have a “magic number” that appears at a specific offset; find that magic number, and you often have found your filesystem. For Linux EXT-2/3/4, that magic number is 0xEF53 found at offset 1080 (0x0438).
+
+	Using this next command and looking at the output:
+
+		 od -x -N 512 ext-super-magic.img +0x0438
+		0000000 0000 0000 0000 0000 0000 0000 0000 0000
+		*
+		0001000
+
+		
+	This command displays the superblock of the file given (+x shown as hex, +0x0438 being the offset )
+
+	We can see that it is filled with 0s which mean we can simply replace the correct magic number in. 
+
+	0 |---------------------------| 0xEF53 |---------| n
+								1080	1080+2
+
+	A simple piece of python can achieve this. 
+
+		#!/usr/bin/python3
+
+		import sys
+
+		corrupted = open(sys.argv[1], 'rb').read()
+
+		correction = corrupted[:1080] + b"\x53\xEF" + corrupted[1082:]
+
+		open('repaired-ext-file.img', 'wb').write(correction)
+
+	Now that we have the repaired system, we can look through the files to search for the flag. However, we can see that the system is littered with 'filler.jpgs' so we need to search for the flag file.
+
+	Using testdisk again, we can now copy all the files out onto our own system and grep for the flag file. We can see that there is a flag.jpg with the flag in the picture.
+
+	Flag:
+		picoCTF{a7DB29eCf7dB9960f0A19Fdde900Af0}
+
+===================================================================
+Lying Out
+
+
+
+
+===================================================================
+What's My Name?
+
+	Hints:
+		If you visited a website at an IP address, how does it know the name of the domain?
+
+	By knowing some basics on networks, we know that the URLs are mapped to IPs using the DNS protocol. By viewing the pcap file in wireshark, we can filter by the protocol to only show DNS, which reduces it to two packets, one query and one response. Inside the response packet we can see the flag.
+
+	Flag:
+		picoCTF{w4lt3r_wh1t3_ddfad6f8f4255adc73e862e3cebeee9d}
+
+===================================================================
+core
+
+	Solve:
+		This program was about to print the flag when it died. Maybe the flag is still in this core file that it dumped?
+
+	Hints:
+	    What is a core file?
+	    Youe may find this reference helpful (GDB cheat sheet).
+	    Try to figure out where the flag was read into memory using the disassembly and strace.
+	    You should study the format options on the cheat sheet and use the examine (x) or print (p) commands. disas may also be usful.
+
+	Some initial information on core dumps/files"
+
+		A file containing a process's address space (memory) when the process terminates unexpectedly
+
+	We are also given two files, a core dump and a binary which does not execute properly. Doing a simple "strings" command on the binary:
+
+		strings core-print_flag |grep pico
+		your flag is: picoCTF{%s}
+
+	Now to find where this string is printed out:
+
+		gdb core-print_flag core
+
+		where
+		#0  print_flag () at ./print_flag.c:90
+		#1  0x08048807 in main () at ./print_flag.c:98
+		#2  0xf7e2e637 in ?? () from /lib32/libc.so.6
+		#3  0x0000000c in ?? ()
+
+		disass print_flag
+		Dump of assembler code for function print_flag:
+		=> 0x080487c1 <+0>:		push   ebp
+		   0x080487c2 <+1>:		mov    ebp,esp
+		   0x080487c4 <+3>:		sub    esp,0x18
+		   0x080487c7 <+6>:		mov    DWORD PTR [ebp-0xc],0x539
+		   0x080487ce <+13>:	mov    eax,DWORD PTR [ebp-0xc]
+		   0x080487d1 <+16>:	mov    eax,DWORD PTR [eax*4+0x804a080]
+		   0x080487d8 <+23>:	sub    esp,0x8
+		   0x080487db <+26>:	push   eax
+		   0x080487dc <+27>:	push   0x804894c
+		   0x080487e1 <+32>:	call   0x8048410 <printf@plt>
+		   0x080487e6 <+37>:	add    esp,0x10
+		   0x080487e9 <+40>:	nop
+		   0x080487ea <+41>:	leave  
+		   0x080487eb <+42>:	ret    
+		End of assembler dump.
+
+		x/8s 0x804894c
+		0x804894c:	"your flag is: p"...
+		0x804895b:	"icoCTF{%s}\n"
+		0x8048967:	""
+		0x8048968:	"\001\033\003;H"
+		0x804896e:	""
+		0x804896f:	""
+		0x8048970:	"\b"
+		0x8048972:	""
+
+	From this we can see that the flag gets printed at print_flag+32 where 0x804894c holds the string and EAX holds the flag variable. We now have to figure out what address EAX holds:
+
+		0x080487c7 <+6>:	mov    DWORD PTR [ebp-0xc],0x539
+		0x080487ce <+13>:	mov    eax,DWORD PTR [ebp-0xc]
+		0x080487d1 <+16>:	mov    eax,DWORD PTR [eax*4+0x804a080]
+
+	Line +16 shows that 0x804a080 is being used as the base and eax*4 is used as the offset.
+
+		x 0x804a080
+		0x804a080 <strs>:	"\b@\005\b0@\005\bX@\005\b\200@\005"...
+
+	This shows that this address is the start of a variable. Looking at line +16 again, we can see that it is multiplying 0x539 (1337) with 4 which is a pattern seen with arrays (4 bytes = 1 index). So the printf is actually printing strs[1337].
+
+		p strs[1337]
+		$1 = 0x80610f0 "e52f4714963eb20"...
+
+	This looks a lot more like the flag and when combined with the string from above, is the correct flag.
+
+
+	Flag:
+		picoCTF{e52f4714963eb207ae54fd424ce3c7d4}
+
+===================================================================
+Malware Shop
+
+	This challenge simply required you to read the graph and look for the number of unique plots and to find the hash with the correct ratio between jmp_count and add_count.
+
+	Flag:
+		picoCTF{w4y_0ut_9043d62d}
+
+===================================================================
+LoadSomeBits
+
+	Hints:
+
+	    Look through the Least Significant Bits for the image
+	    If you interpret a binary sequence (seq) as ascii and then try interpreting the same binary sequence from an offset of 1 (seq[1:]) as ascii do you get something similar or completely different?
+
+	Judging from the name (LSB = least significant bit)and the hints of this challenge, we will need to construct a new sequence of bits using only the LSB, which then bruteforces the offset. A simple python script can solve this:
+
+		#!/usr/bin/python3
+
+		import binascii
+
+		all_bits = ''
+
+		with open('loadsomebits.bmp', 'rb') as og_file:
+			while True:
+
+				try:
+					lsb = og_file.read(1)
+					lsb = ord(lsb)
+					lsb = bin(lsb)[2:].rjust(8, '0')
+					all_bits += str(lsb[7])
+				except:
+					break
+
+		for offset in range(16):
+			offset_binary = ''
+			try:
+				try_string = str(binascii.unhexlify('%x' % int(all_bits[:-offset], 2)))
+			except:
+				continue
+
+			if 'pico' in try_string:
+				print(try_string)
+				break
+
+	Flag:
+		picoCTF{st0r3d_iN_tH3_l345t_s1gn1f1c4nT_b1t5_2705826400}
+
+===================================================================
+
+
+
+		I'm back here at the office yet again, staring out of this window. This time, the view is less spectacular, less grand. I had been staring out at the clouds. It's a nice day out today, the smog had finally sifted and there's a hint of the blue sky above. The white sheet of clouds slowly wiped across the sky. At this moment I have the strangest urge to find the ocean and just sit. Just sit there and stare, at how vast the world is. I do not know where this urge originated but it is overwhelming. I have been so caught up with the modern world, with the city life, with the people, that I have forgotten the peace I had always found with nature.
+
+		The scale that it brings to my mind, reminds me that the world is much larger than me, than people, than humanity. It is always a humbling experience, my thoughts always coming away grounded. Why is this I wonder. 
+
+		The light from the morning sun has leaked through the clouds and onto my desk. For the first time that I have been here, the sun light has reached me. I had awoken today, thinking that I would have to face another day at the office, mindlessly droning at my desk. An epiphany was the last thing that was on my mind. 

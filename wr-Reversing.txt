@@ -1,0 +1,223 @@
+===================================================================
+Reversing Warmup 1
+	
+	Write Up:
+
+		Program Flow:
+			1. main()
+				Calls setvbuf(__bss_start, 0,2,0)
+					File *stream = data segment : __bss_start
+					char *buffer = 0
+					int mode = 2 (line buffering)
+					size = 0
+
+				Calls puts(aPicoFlag)
+
+		Flag:
+			picoCTF{welc0m3_t0_r3VeRs1nG}
+===================================================================
+Reversing Warmup 2
+
+	Flag:
+		picoCTF{th4t_w4s_s1mpL3}
+
+===================================================================
+assembly-0
+
+	Program Flow:
+		asm0(0x2a, 0x4f) shows that 0x2a is at eax and 0x4f is at ebx due to the calling convention and how the stack frame is created. The value 0x4f overwrites 0x2a in asm0.
+
+	Flag:
+		0x4f
+
+
+===================================================================
+assembly-1
+
+	Program Flow:
+		asm1(0x255)
+		asm1:
+			compares 0x255 to 0xea = greater than -> jumps to part_a
+
+		part_a:
+			compares 0x255 to 0x6 = no equal -> jumps to part_c
+
+		part_c:
+			Add 0x255 with 0x3 = 0x258 -> returns to part_a
+
+		part_a:
+			Subtracts 0x255 with 0x3 = 0x255 -> jump part_d
+
+		part_d:
+			Pops value from stack to ebp -> returns to part_a 
+
+		part_a: 
+			Finished running, return to asm1
+
+		asm1:
+			compares 0x255 with 0x8, not equal -> jump to part_b
+
+		part_b:
+			Pattern of Subtracting 0x3 and then jumping to part_c to add 0x3
+		......
+
+		asm1:
+			Adds 0x255 with 0x3 and exits.
+	Flag:
+		0x258
+
+===================================================================
+assembly-2
+
+	Program Flow:
+		asm2(0xe, 0x21)
+		asm2() increments 0x21 and adds 0x41 to 0xe until 0xe is equal or greater than 0x9886
+
+	Solution:
+
+		from pwn import *
+
+		start = 0xe
+		increment = 0x21
+
+
+		while start < 0x9886:
+		start += 0x41
+		increment += 1
+		print (hex(increment))
+
+
+	Flag:
+		0x27a
+
+===================================================================
+assembly-3
+
+	Program Flow:
+		asm3(0xf238999b,0xda0f9ac5,0xcc85310c)
+
+		ebp+0x8 = 	0xf238 999b
+		ebp+0xc = 	0xda0f 9ac5
+		ebp+0x10 = 	0xcc85 310c
+
+		mov	eax,0xb6				eax = 	0x000000b6
+		xor	al, al 					eax = 	0x00000000			
+		mov	ah,BYTE PTR [ebp+0x8]   eax = 	0x0000f200
+		sal	ax,0x10 				eax = 	0xf2000000	
+		sub	al,BYTE PTR [ebp+0xf]	eax =	0xf200003c
+			** two's complement of -0xc5 is 0x3c
+
+		add	ah,BYTE PTR [ebp+0xd]	eax = 	0xf2000f3c
+		xor	ax,WORD PTR [ebp+0x12]	eax =	0xf2000f0d
+
+
+	Solution:
+
+		#!/usr/bin/python3
+
+
+		from pwn import *
+
+		context.arch = 'i386'
+
+		asm3 = '''
+			asm3:
+			push   	ebp
+			mov    	ebp,esp
+			mov	eax,0xb6
+			xor	al,al
+			mov	ah,BYTE PTR [ebp+0x8]
+			sal	ax,0x10
+			sub	al,BYTE PTR [ebp+0xf]
+			add	ah,BYTE PTR [ebp+0xd]
+			xor	ax,WORD PTR [ebp+0x12]
+			mov	esp, ebp
+			pop	ebp
+			ret
+		'''
+
+		#write arugments
+		shellcode = shellcraft.push(0xcc85310c)
+		shellcode += shellcraft.push(0xda0f9ac5)
+		shellcode += shellcraft.push(0xf238999b)
+		shellcode += 'call asm3\n'
+
+		# write result
+		shellcode += shellcraft.push('eax')
+		shellcode += shellcraft.write(1, 'esp', 4)
+		# exit
+		shellcode += shellcraft.exit()
+		# asm3
+		shellcode += asm3
+
+		p = run_assembly(shellcode)
+		print (hex(u32(p.recvall())))
+
+	Flag:
+		0x56a3
+
+
+===================================================================
+assembly-3
+	
+	Write Up:
+		As the source they provided was a .nasm, we can simple complile with nasm and gcc and then run it.
+
+		Running it outputs the flag.
+
+	Flag:
+		picoCTF{1_h0p3_y0u_c0mP1l3d_tH15_32429699163}
+
+===================================================================
+be-quick-or-be-dead-1
+	
+	Write Up:
+
+		Program Flow:
+
+			main()
+				Calls on 4 functions: 
+					header(),
+
+					set_timer(),
+						Sets variable 'seconds' to be 1
+						Calls alarm()
+
+					get_key(), 
+						1. puts("calculating key......")
+						2. calls calculate_key() and saved in data segment under 'key'
+						3. puts(Done calculating key)
+
+					print_flag()
+						1. puts(printing flag)
+						2. calls decrypt_flag()
+							Uses key to decrypt and return flag
+						3. puts(flag)
+
+			Just simply running the program, it will terminate before the 2nd puts in get_key() and displays 
+
+				Calculating key...
+				You need a faster machine. Bye bye.
+
+			The last line is frome alarm_handler()  which puts() the message
+
+			Since we know the alarm triggers the program to exit, and the alarm is handled by SIGALARM, we can simply run the program in GDB and tell it to ignore the signal so the program can finish running. 
+
+				handle SIGALRM ignore
+
+				Program received signal SIGALRM, Alarm clock.
+
+				Done calculating key
+				Printing flag:
+				picoCTF{why_bother_doing_unnecessary_computation_fedbb737}
+				[Inferior 1 (process 24817) exited normally]
+
+		Flag:
+			picoCTF{why_bother_doing_unnecessary_computation_fedbb737}
+
+===================================================================
+quack me
+
+	Write Up:
+
+			Program Flow:

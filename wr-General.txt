@@ -1,0 +1,572 @@
+
+===================================================================
+General Warmup 1
+	
+	Flag:
+		picoCTF{A}
+
+===================================================================
+General Warmup 2
+
+	Flag:
+		picoCTF{11011}
+
+===================================================================
+General Warmup 3
+
+	Flag:
+		picoCTF{61}
+
+===================================================================
+Resources
+	
+	Flag:
+		picoCTF{xiexie_ni_lai_zheli}
+
+===================================================================
+grep 1
+	
+	Command:
+		cat grep1 |grep pico
+
+	Flag:
+		picoCTF{grep_and_you_will_find_52e63a9f}
+
+===================================================================
+net cat
+
+	Command:
+		nc 2018shell.picoctf.com 37721
+
+	Flag:
+		picoCTF{NEtcat_iS_a_NEcESSiTy_0b4c4174}
+
+===================================================================
+strings
+
+	Command:
+		strings strings|grep pico
+
+	Flag:
+		picoCTF{sTrIngS_sAVeS_Time_2fbe2166}
+
+===================================================================
+pipe
+
+	Command:
+		nc 2018shell.picoctf.com 34532 | grep pico
+
+	Flag:
+		picoCTF{almost_like_mario_b797f2b3}
+
+
+===================================================================
+grep 2
+
+	Command:
+		grep -r pico
+
+	Flag:
+		picoCTF{grep_r_and_you_will_find_036bbb25}
+
+===================================================================
+Aca-Shell-A
+
+	Commands:
+		cd secret
+		ls
+		rm *
+		echo 'Drop it in!'
+		./dontLookHere
+		whoami
+		cp /tmp/TopSecret /passwords
+		cat TopSecret
+
+	Flag:
+		picoCTF{CrUsHeD_It_9edaa84a}
+
+===================================================================
+enivron
+	
+	Command:
+		printenv
+
+	Flag:
+		picoCTF{eNv1r0nM3nT_v4r14Bl3_fL4g_3758492}
+
+
+===================================================================
+ssh-keyz
+	Write Up:
+
+		1. Generate public key with ssh-keygen
+		2. Copy over contents of /id_rsa into picoCTF server 
+		3. ssh int0x80@2018shell.picoctf.com
+
+		Flag:
+			picoCTF{who_n33ds_p4ssw0rds_38dj21}
+===================================================================
+What Base is this
+
+	Solution:
+		***didn't realise first question's answer was given
+		Python script:
+
+			from pwn import *
+
+			r = remote('2018shell.picoctf.com', 14390)
+
+			r.recvuntil("Please give me the ")
+
+			#binary conversion
+			whole = r.recvline()
+			binary = whole.split()
+			word = ""
+			for chars in binary:
+				chars = chars.decode('ascii')
+				if len(chars) == 8:
+						chars = hex(int(chars,2))
+						chars = chars[2:]
+						word +=chars
+			print(bytes.fromhex(word))
+			r.sendline(bytes.fromhex(word))
+			r.recvuntil("Please give me the ")
+
+			#hex conversion
+			hexstr = r.recvline()
+			hexlist = hexstr.split()
+			hexstr = hexlist[0].decode('ascii')
+			print(bytes.fromhex(hexstr))
+			r.sendline(bytes.fromhex(hexstr))
+
+
+			#octal conversion
+			r.recvuntil("Please give me the ")
+			word=""
+			whole = r.recvline()
+			integer = whole.split()
+			print(integer)
+
+			for chars in integer:
+				chars = chars.decode('ascii')
+				if len(chars) == 3:
+						chars = hex(int(chars,8))
+						chars = chars[2:]
+						word +=chars
+
+			print(bytes.fromhex(word))
+			r.sendline(bytes.fromhex(word))
+			r.interactive()
+
+
+	Flag:
+		picoCTF{delusions_about_finding_values_602fd280}
+
+
+===================================================================
+you can't see me
+
+	Command:
+		cat .*
+		cat: .: Is a directory
+		picoCTF{j0hn_c3na_paparapaaaaaaa_paparapaaaaaa_093d6aff}
+		cat: ..: Permission denied
+
+	Flag:
+		picoCTF{j0hn_c3na_paparapaaaaaaa_paparapaaaaaa_093d6aff}
+
+===================================================================
+absolutely relative
+
+	Program:
+		1. Uses fopen with path to open flag.txt
+		2. Uses fopen to open permissions.txt
+		3. Compares permission[5] to 'yes'
+			If True, then read flag
+
+	Write Up:
+		Since we can see in the source code that the opening flag.txt will always be successful as the path is hardcoded, which means we can run it from any directory.
+
+		permissions.txt is different as it has to be at the current working directory.
+
+		The idea would be to find a directory where we have write permissions to create permissions.txt and then run ./absolutley-relative from that directory.
+
+	Commands:
+		cd /tmp
+		echo 'yes' >permission.txt
+		/problems/absolutely-relative_0_d4f0f1c47f503378c4bb81981a80a9b6/absolutely-relative
+
+	Flag:
+		picoCTF{3v3r1ng_1$_r3l3t1v3_befc0ce1}
+
+===================================================================
+in out error
+
+	Write Up:
+		Program asks for the input "Please may I have the flag?"
+		It then outputs a bunch of random letters. Since the name is in out error, we can assume that the flag is either outputted as a stderror or stdout. We can simply split to the one (one output to a file) so we can see the split.
+
+		Using commands:
+
+			./in-out-error 2>> /tmp/inout.txt
+
+		The random letters changed to the lyrics to Never Gonna Give You Up.
+
+			cat /tmp/inout.txt
+
+		This gave us the flag repeated over and over.
+
+	Flag:
+
+		picoCTF{p1p1ng_1S_4_7h1ng_f37fb67e}
+
+
+===================================================================
+script me
+
+	The most difficult parts of this challenge was to figure out what the rules were and how to count the number of layers in each value.
+
+	Although the different rules were give, they were hard to understand. It boiled down to 3 rules depend on the layer of A and B. 
+
+		If A = B => 	AB
+		If A > B =>		(A(B))
+		If A < B =>		((A)B)
+
+	To count the number, simple treat each "(" as a new layer (increment counter) until ")" is hit which decrements, and is checked against the previous value (max(a,b)) to check whether the layer remained the same.
+
+	Exploit:
+		#!/usr/bin/python3
+
+		def setup_question():
+			question = r.recvline()
+			split_question = question.split()
+			temp_variables = []
+
+			for value in split_question:
+				value = value.decode('utf-8')
+				if value.find("(") != -1:
+					temp_variables.append(value)
+
+			return temp_variables
+
+		def calculate_layers(value):
+			num_layers = 0
+			count = 0
+			for i in range(len(value)):
+				if value[i] == "(":
+					num_layers +=1
+
+				elif value[i] == ")":
+					num_layers -=1
+					count = max(count, num_layers)
+			return count
+
+		def add_variables(values):
+			curr = ""
+			for i in range(len(values)):
+
+				if curr == "":
+					curr = values[i]
+					curr_layer = calculate_layers(curr)
+				else:
+					temp_layer = calculate_layers(values[i])
+					print ("[{}] + [{}] = ".format(curr_layer, temp_layer), end='')
+
+					if curr_layer == temp_layer:
+						curr = curr + values[i]
+
+					elif curr_layer < temp_layer:
+						temp = values[i]
+						curr = "("+curr+temp[1:]
+						curr_layer = temp_layer
+
+					elif curr_layer > temp_layer:
+						curr = curr[:-1] + values[i] +")"
+					print(curr_layer)
+
+			return curr
+
+
+		from pwn import *
+
+		r = remote('2018shell.picoctf.com', 61344)
+
+
+		# Question 1
+		r.recvuntil("with a warmup.")
+		r.recvline()
+
+		variables = setup_question()
+		log.info("Question 1")
+		print("Values to add: {}".format(variables))
+		answer = add_variables(variables)
+		r.sendlineafter(">",answer)
+
+		#Question 2
+		variables.clear()
+		r.recvline()
+		r.recvline()
+		r.recvline()
+
+		log.info("Question 2")
+		variables = setup_question()
+		print("Values to add: {}".format(variables))
+		answer = add_variables(variables)
+		r.sendlineafter(">", answer)
+
+		#Question 3
+		variables.clear()
+		r.recvline()
+		r.recvline()
+		r.recvline()
+
+		log.info("Question 3")
+		variables = setup_question()
+		print("Values to add: {}".format(variables))
+		answer = add_variables(variables)
+		r.sendlineafter(">", answer)
+
+		#Question 4
+		variables.clear()
+		r.recvline()
+		r.recvline()
+		r.recvline()
+
+		log.info("Question 4")
+		variables = setup_question()
+		print("Values to add: {}".format(variables))
+		answer = add_variables(variables)
+		r.sendlineafter(">", answer)
+
+		#Question 5
+		variables.clear()
+		r.recvline()
+		r.recvline()
+		r.recvline()
+
+		log.info("Question 5")
+		variables = setup_question()
+		print("Values to add: {}".format(variables))
+		answer = add_variables(variables)
+		r.sendlineafter(">", answer)
+		r.interactive()
+
+	Flag:
+		picoCTF{5cr1pt1nG_l1k3_4_pRo_cde4078d}
+
+
+===================================================================
+learn gdb
+
+	Hint:
+		Can you run this program in gdb and find the flag?
+
+	Using the hint, I ran the this program in gdb (with pwndbg installed)
+
+		gdb learngdb
+		info functions
+		All defined functions:
+		Non-debugging symbols:
+		0x00000000004005c0  _init
+		0x00000000004005f0  putchar@plt
+		0x0000000000400600  puts@plt
+		0x0000000000400610  __stack_chk_fail@plt
+		0x0000000000400620  __libc_start_main@plt
+		0x0000000000400630  strtol@plt
+		0x0000000000400640  malloc@plt
+		0x0000000000400650  setvbuf@plt
+		0x0000000000400660  exit@plt
+		0x0000000000400670  usleep@plt
+		0x0000000000400680  __gmon_start__@plt
+		0x0000000000400690  _start
+		0x00000000004006c0  deregister_tm_clones
+		0x0000000000400700  register_tm_clones
+		0x0000000000400740  __do_global_dtors_aux
+		0x0000000000400760  frame_dummy
+		0x0000000000400786  decrypt_flag
+		0x00000000004008c9  main
+		0x0000000000400920  __libc_csu_init
+		0x0000000000400990  __libc_csu_fini
+		0x0000000000400994  _fini
+
+	This shows that the binary has a function main()
+
+		disass main
+		Dump of assembler code for function main:
+		   0x00000000004008c9 <+0>:	push   rbp
+		   0x00000000004008ca <+1>:	mov    rbp,rsp
+		   0x00000000004008cd <+4>:	sub    rsp,0x10
+		   0x00000000004008d1 <+8>:	mov    DWORD PTR [rbp-0x4],edi
+		   0x00000000004008d4 <+11>:	mov    QWORD PTR [rbp-0x10],rsi
+		   0x00000000004008d8 <+15>:	mov    rax,QWORD PTR [rip+0x200af9]        # 0x6013d8 <stdout@@GLIBC_2.2.5>
+		   0x00000000004008df <+22>:	mov    ecx,0x0
+		   0x00000000004008e4 <+27>:	mov    edx,0x2
+		   0x00000000004008e9 <+32>:	mov    esi,0x0
+		   0x00000000004008ee <+37>:	mov    rdi,rax
+		   0x00000000004008f1 <+40>:	call   0x400650 <setvbuf@plt>
+		   0x00000000004008f6 <+45>:	mov    edi,0x4009d0
+		   0x00000000004008fb <+50>:	call   0x400600 <puts@plt>
+		   0x0000000000400900 <+55>:	mov    eax,0x0
+		   0x0000000000400905 <+60>:	call   0x400786 <decrypt_flag>
+		   0x000000000040090a <+65>:	mov    edi,0x400a08
+		   0x000000000040090f <+70>:	call   0x400600 <puts@plt>
+		   0x0000000000400914 <+75>:	mov    eax,0x0
+		   0x0000000000400919 <+80>:	leave  
+		   0x000000000040091a <+81>:	ret    
+		End of assembler dump.
+
+	This shows that the program calls puts(?) and then decrypt_flag(0) and another puts(?).
+	Running the program, it outputs:
+
+		Decrypting the Flag into global variable 'flag_buf'
+		.....................................
+		Finished Reading Flag into global variable 'flag_buf'. Exiting.
+
+	We can guess that the two sentences are outputted with puts() while the ... are displayed in decrypt_flag()
+
+	We now need to look into decrypt_flag()
+
+		disass decrypt_flag
+		.....
+	    0x00000000004007a2 <+28>:	call   0x400640 <malloc@plt>
+	    0x00000000004007a7 <+33>:	mov    QWORD PTR [rip+0x200c3a],rax        # 0x6013e8 <flag_buf>
+	    0x00000000004007ae <+40>:	mov    rax,QWORD PTR [rip+0x200c33]        # 0x6013e8 <flag_buf>
+   		.....
+   		0x00000000004007ec <+102>:	mov    edi,0x2e
+   		0x00000000004007f1 <+107>:	call   0x4005f0 <putchar@plt>
+   		.....
+
+   	These were the lines that were of interest as the first chunk shows that that the flag_buf is stored in the heap , second chunk confirms our guess of where the .... was outputted (0x2e = hex for '.')
+
+   	By putting a break point at decrypt_flag+33, we can run it to see where the flag is malloc'd at the address of RAX
+
+   		 RAX  0x602260 ◂— 0x0
+		 RBX  0x0
+		 RCX  0x602260 ◂— 0x0
+		 RDX  0x602260 ◂— 0x0
+		 RDI  0x602290 ◂— 0x0
+
+	However, it is still empty so we need to let the program run until it is filled. Setting another breakpoint right before the decrpyt_flag() returns at decrypt_flag+321:
+
+		x/4s 0x602260
+		0x602260:	"picoCTF{gDb_iS_"...
+		0x60226f:	"sUp3r_u53fuL_9f"...
+		0x60227e:	"a6c71d}"
+		0x602286:	""
+
+	There we have the flag in chunks picoCTF{gDb_iS_sUp3r_u53fuL_9fa6c71d}
+
+	Flag:
+		picoCTF{gDb_iS_sUp3r_u53fuL_9fa6c71d}
+
+
+===================================================================
+roulette
+	
+	Hints:
+		There are 2 bugs!
+
+	Looking at the source, we can see that 'cash' needs to be > 1 billion and 3 wins are required to print the flag and rand() is used to get_rand the roulette number and seed.
+
+	Simply trying an integer overflow results in (wager: 2147583648) :
+		*** Current Balance: $2147383851 ***
+		Wait a second... You're not even on a hotstreak! Get out of here cheater!
+
+	So even though we were able to achieve a balance of >1billion, we have to win 3 times somehow.
+
+	Looking at the source, we can see that 'cash' is actually the seed as it is returned
+
+		cash = get_rand();
+	
+	Where
+
+		long get_rand() {
+		  long seed;
+		  FILE *f = fopen("/dev/urandom", "r");
+		  fread(&seed, sizeof(seed), 1, f);
+		  fclose(f);
+		  seed = seed % 5000;
+		  if (seed < 0) seed = seed * -1;
+		  srand(seed);
+		  return seed;
+		}
+
+	We can reproduce the "random" values used to calculate
+
+		long spin = (rand() % ROULETTE_SIZE)+1;
+
+	Where spin is the winning choice.
+	spin_generator.c takes in a starting value (seed which we can get from running the program):
+
+		#include <stdio.h>
+		#include <stdint.h>
+		#include <stdlib.h>
+		#include <time.h>
+		#include <unistd.h>
+		#include <limits.h>
+
+		int main(int argc, char *argv[]) {
+		    int seed = atoi(argv[1]);
+
+		    srand(seed);
+
+		    for (int i = 0; i < 10; ++i)
+		        printf("%d,", rand());
+
+		    return 0;
+		}
+
+	It outputs the different values calculated, as we only need to win 3 times.
+	When our starting cash is $4876
+
+	./spin_generator 4876
+	395574451,1840706156,2140242400,2115693767,1602154636,108645864,2058609245,1288249078,1659939466,459148800
+
+	Taking the first few and calculating %36+1 :
+		7, 21, 29, 21, 17
+
+	Those should be the values we guess in that order. However, looking at the program, it seems to be skipping every second value (winning values = 7,29,17)
+
+	Using this pattern and then entering a bet of $2147583648 after 3 wins outputs the flag.
+
+	Flag:
+		picoCTF{1_h0p3_y0u_f0uNd_b0tH_bUg5_25142e09}
+
+
+
+===================================================================
+store
+
+	Hints:
+		Two's compliment can do weird things when numbers get really big!
+
+	From this hint alone we can tell that this program will have an integer overflow bug. Looking at the source code:
+
+		scanf("%d", &number_flags);
+	    if(number_flags > 0){
+	        int total_cost = 0;
+	        total_cost = 1000*number_flags;
+	        printf("\nYour total cost is: %d\n", total_cost);
+	        if(total_cost <= account_balance){
+	            account_balance = account_balance - total_cost;
+
+    We can see that we control number_flags, which controls total_cost, which controls the account_balance. In a scenario where total_cost is negative, the value will be added into account_balance instead of being subtracted.
+
+    In order to do this, total_cost must be <= account_balance, which can again be achieved with a negative total_cost.
+
+    	total_cost = 1000*number_flags;
+
+    Is where we can cause total_cost to be negative. Since total_cost is an integer, the maximum value it can hold is ~2,150,000,000, so if we were to give it a value of 2,150,000 (*1000 = more than its max) it will overflow and wrap around to its lowest number.
+
+    Buying 2,150,000 imitation flags causes:
+
+    	Your total cost is: -2144967296
+
+		Your new balance: 2144968396
+
+	With this balance, we are able to purchase the real flag.
+
+	Flag:
+		picoCTF{numb3r3_4r3nt_s4f3_dbd42a50}
+
+

@@ -1,0 +1,113 @@
+
+===================================================================
+Warm up 1
+
+	Vigenere Cipher
+
+	Flag:
+		picoCTF{SECRETMESSAGE}
+===================================================================
+Warm up 2
+
+	rot13
+
+	Flag:
+		picoCTF{this_is_crypto!}
+
+===================================================================
+HEEEEEEERE'S Johnny!
+
+	Provided with two files, one of which (shadow) contained the hash to the password for user root. Simply running the file into John the Ripper cracked the hash and gave the flag
+
+	Flag:
+		picoCTF{J0hn_1$_R1pp3d_289677b5}
+
+
+===================================================================
+Caesar Cipher 1
+
+		Caesar ciphers are vulnerable to frequency analysis.
+
+	Flag:
+		picoCTF{justagoodoldcaesarcipherobyujeez}
+
+===================================================================
+hertz
+
+	Hints:
+		NOTE: Flag is not in the usual flag format
+
+	Running netcat displayed a wall of encrypted text. The line that looks interesting is :
+
+		dozdcvcocvpk_mvyixtd_gtx_dplrgzlx_wqqiyuptvv
+
+	As that is usually how the flag looks. However the hint says otherwise so it wold be best to keep looking for clues. The name 'Hertz' maybe pointing at a frequency analysis. Using one of the many tools online, 
+
+		https://www.guballa.de/substitution-solver
+
+	we can break the cipher which confirms my initial suspsicion as the flag was that very line.
+
+	Flag:
+		picoCTF{substitution_ciphers_are_solvable_mwwhpforii}
+
+===================================================================
+blaise's cipher
+
+	Solve:
+		My buddy Blaise told me he learned about this cool cipher invented by a guy also named Blaise! Can you figure out what it says? Connect with nc 2018shell.picoctf.com 11281
+
+	Hints:
+	    There are tools that make this easy.
+	    This cipher was NOT invented by Pascal
+
+	A cipher which was created by Blaise was the Vigenere Cipher. Running netcat shows again another wall of text, and we can clearly see where the flag is this time.
+
+		pohzCZK{g1gt3w3_n1pn3wd_ax3s7_maj_5352gq72}
+
+	Like the hint says we can simply search online for a Vigenere Cipher decoder.
+
+	Using https://www.dcode.fr/vigenere-cipher
+
+	We first input a paragraph into the tool so it has a large sample in order to guess the key, which returned the key as the string "FLAG". 
+	Using this to decode gives us the flag.
+
+	Flag:
+		picoCTF{v1gn3r3_c1ph3rs_ar3n7_bad_5352bf72}
+
+===================================================================
+hertz 2
+
+	Hints:
+		These kinds of problems are solved with a frequency that merits some analysis.
+
+	Similar problem as hertz 1 but with less text this time, which means we can actually attempt to do some frequency analysis if the decoders don't work. They do however and we have the flag.
+
+	Flag:
+		picoCTF{substitution_ciphers_are_too_easy_hhhhiltptt}
+
+===================================================================
+Caesar Cipher 2
+
+	Hints:
+		You'll have figure out the correct alphabet that was used to encrypt the ciphertext from the ascii character set
+
+	The file given contains the text:
+
+		PICO#4&[C!ESA2?#I0H%R
+		3?JU34?A2%N4?S%C5R%]
+
+	So now special characters are also used, but we know/can guess some of these characters
+
+		P I C O # 4 & [ C ! E S A 2 ? # I 0 H % R 3 ? J U 3 4 ? A 2 % N 4 ? S % C 5 R % ]
+		P I C O	C T F { C A E S A R _ C I P H E R S _ J U S T _ A R E N T _ S E C U R E }
+
+	This was done by pure guess and was incorrect. Perhaps a couple of letters were replaced with lower case/ numbers? Running this through the decoder again:
+
+		Key: ASCII[!-~]+62
+		picoCTF{cAesaR_CiPhErS_juST_aREnT_sEcUrE}
+
+	Which was the flag I guessed with just different casing.
+
+	Flag:
+
+		picoCTF{cAesaR_CiPhErS_juST_aREnT_sEcUrE}
